@@ -1,6 +1,6 @@
 // Let d3 do the DOM instead of react
 import React, { useRef, useEffect, useState } from "react";
-import { select } from "d3";
+import { select, line, curveCardinal } from "d3";
 import "./App.css";
 
 function App() {
@@ -8,22 +8,24 @@ function App() {
 
   const [data, setData] = useState([25, 30, 45, 60, 20]);
 
-  // the empty array suggests that it will only run once
+  // Line graph, path allows curves
   useEffect(() => {
     console.log(svgRef);
     const svg = select(svgRef.current);
+    const myLine = line()
+      .x((value, index) => index * 50)
+      .y((value) => 150 - value)
+      .curve(curveCardinal);
+
     svg
-      .selectAll("circle")
-      .data(data)
-      .join(
-        (enter) => enter.append("circle"),
-        (update) => update.attr("class", "updated"),
-        (exit) => exit.remove()
-      )
-      .attr("r", (value) => value)
-      .attr("cx", (value) => value * 2)
-      .attr("cy", (value) => value * 2)
-      .attr("stroke", "red");
+      .selectAll("path")
+      // the square brackets avoid d3 to create a path for each data
+      .data([data])
+      // .join() create the path element
+      .join("path")
+      .attr("d", (value) => myLine(value))
+      .attr("fill", "none")
+      .attr("stroke", "blue");
   }, [data]);
 
   return (
