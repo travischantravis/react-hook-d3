@@ -8,7 +8,6 @@ function App() {
 
   const [data, setData] = useState([25, 30, 45, 60, 20]);
 
-  // the empty array suggests that it will only run once
   useEffect(() => {
     console.log(svgRef);
     const svg = select(svgRef.current);
