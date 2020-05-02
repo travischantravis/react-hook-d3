@@ -1,24 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// Let d3 do the DOM instead of react
+import React, { useRef, useEffect } from "react";
+import { select } from "d3";
+import "./App.css";
+
+const data = [25, 30, 45, 60, 20];
 
 function App() {
+  const svgRef = useRef();
+
+  // the empty array suggests that it will only run once
+  useEffect(() => {
+    console.log(svgRef);
+    const svg = select(svgRef.current);
+    svg
+      .selectAll("circle")
+      .data(data)
+      .join(
+        (enter) => enter.append("circle"),
+        (update) => update.attr("class", "updated"),
+        (exit) => exit.remove()
+      )
+      .attr("r", (value) => value)
+      .attr("cx", (value) => value * 2)
+      .attr("cy", (value) => value * 2)
+      .attr("stroke", "red");
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <svg ref={svgRef}></svg>
     </div>
   );
 }
