@@ -1,13 +1,6 @@
 // Let d3 do the DOM instead of react
 import React, { useRef, useEffect, useState } from "react";
-import {
-  select,
-  axisBottom,
-  axisRight,
-  scaleLinear,
-  scaleBand,
-  color,
-} from "d3";
+import { select, axisBottom, axisRight, scaleLinear, scaleBand } from "d3";
 import "./App.css";
 
 function App() {
@@ -27,7 +20,7 @@ function App() {
     const yScale = scaleLinear().domain([0, 150]).range([150, 0]);
 
     const colorScale = scaleLinear()
-      .domain([75, 100, 150])
+      .domain([50, 100, 150])
       .range(["green", "orange", "red"])
       .clamp(true);
 
@@ -47,25 +40,48 @@ function App() {
       .attr("x", (value, index) => xScale(index))
       .attr("y", -150)
       .attr("width", xScale.bandwidth())
+      .on("mouseenter", (value, index) => {
+        svg
+          .selectAll(".tooltip")
+          .data([value])
+          .join((enter) => enter.append("text").attr("y", yScale(value) - 4))
+          .attr("class", "tooltip")
+          .text(value)
+          .attr("x", xScale(index) + xScale.bandwidth() / 2)
+          .attr("text-anchor", "middle")
+          .transition()
+          .attr("y", yScale(value) - 8)
+
+          .attr("opacity", 1);
+      })
+      .on("mouseleave", () => svg.select(".tooltip").remove())
       .transition()
       .attr("fill", colorScale)
       .attr("height", (value) => 150 - yScale(value));
   }, [data]);
 
   return (
-    <div className="App">
+    <React.Fragment>
       <svg ref={svgRef}>
         <g className="x-axis" />
         <g className="y-axis" />
       </svg>
 
       <button onClick={() => setData(data.map((value) => value + 5))}>
-        Upadte data
+        Increment data
       </button>
-      <button onClick={() => setData(data.filter((value) => value <= 5))}>
+      <button onClick={() => setData(data.map((value) => value - 5))}>
+        Decrement data
+      </button>
+      <button onClick={() => setData(data.filter((value) => value <= 50))}>
         Filter data
       </button>
-    </div>
+      <button
+        onClick={() => setData([...data, Math.round(Math.random() * 100)])}
+      >
+        Add data
+      </button>
+    </React.Fragment>
   );
 }
 
