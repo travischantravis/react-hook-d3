@@ -2,55 +2,54 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
   select,
-  line,
-  curveCardinal,
   axisBottom,
   axisRight,
   scaleLinear,
+  scaleBand,
+  color,
 } from "d3";
 import "./App.css";
 
 function App() {
-  // width is 300px?
   const svgRef = useRef();
 
   const [data, setData] = useState([25, 30, 45, 60, 20, 60, 75]);
 
-  // Line graph, path allows curves
   useEffect(() => {
     const svg = select(svgRef.current);
 
-    const xScale = scaleLinear()
-      .domain([0, data.length - 1])
-      .range([0, 300]);
+    const xScale = scaleBand()
+      .domain(data.map((value, index) => index))
+      .range([0, 300])
+      .padding(0.5);
 
-    // domain 0 will be mapped to 150, while domain 75 will be mapped to 0
-    const yScale = scaleLinear().domain([0, 75]).range([150, 0]);
+    // domain 0 will be mapped to 150, while domain 150 will be mapped to 0
+    const yScale = scaleLinear().domain([0, 150]).range([150, 0]);
 
-    const xAxis = axisBottom(xScale)
-      .ticks(data.length)
-      .tickFormat((index) => index + 1);
+    const colorScale = scaleLinear()
+      .domain([75, 100, 150])
+      .range(["green", "orange", "red"])
+      .clamp(true);
+
+    const xAxis = axisBottom(xScale).ticks(data.length);
+
     const yAxis = axisRight(yScale);
 
     svg.select(".x-axis").style("transform", "translateY(150px)").call(xAxis);
     svg.select(".y-axis").style("transform", "translateX(300px)").call(yAxis);
 
-    // Generate the d attribute of a path element
-    const myLine = line()
-      .x((value, index) => xScale(index))
-      .y(yScale)
-      .curve(curveCardinal);
-
     svg
-      .selectAll(".line")
-      // the square brackets avoid d3 to create a path for each data
-      .data([data])
-      // .join() create the path element
-      .join("path")
-      .attr("class", "line")
-      .attr("d", myLine)
-      .attr("fill", "none")
-      .attr("stroke", "blue");
+      .selectAll(".bar")
+      .data(data)
+      .join("rect")
+      .attr("class", "bar")
+      .style("transform", "scale(1, -1)")
+      .attr("x", (value, index) => xScale(index))
+      .attr("y", -150)
+      .attr("width", xScale.bandwidth())
+      .transition()
+      .attr("fill", colorScale)
+      .attr("height", (value) => 150 - yScale(value));
   }, [data]);
 
   return (
@@ -59,9 +58,7 @@ function App() {
         <g className="x-axis" />
         <g className="y-axis" />
       </svg>
-      <br />
-      <br />
-      <br />
+
       <button onClick={() => setData(data.map((value) => value + 5))}>
         Upadte data
       </button>
