@@ -1,46 +1,75 @@
 // Let d3 do the DOM instead of react
-import React, { useEffect, useState } from "react";
-import BBTimeline from "./BBTimeline";
+import React, { useState } from "react";
+import RacingBarChart from "./RacingBarChart";
+import useInterval from "./useInterval";
 import "./App.css";
 
+const getRandomIndex = (array) => {
+  return Math.floor(array.length * Math.random());
+};
+
 function App() {
-  const [bbEpisodes, setBbEpisodes] = useState([]);
-  const [bbCharacters, setBbCharacters] = useState([]);
-  const [highlight, setHighlight] = useState();
+  const [iteration, setIteration] = useState(0);
+  const [start, setStart] = useState(false);
+  const [data, setData] = useState([
+    {
+      name: "United",
+      value: 10,
+      color: "#DA291C",
+    },
+    {
+      name: "City",
+      value: 15,
+      color: "#6CABDD",
+    },
+    {
+      name: "Arsenal",
+      value: 20,
+      color: "#EF0107",
+    },
+    {
+      name: "Spurs",
+      value: 25,
+      color: "#132257",
+    },
+    {
+      name: "Liverpool",
+      value: 30,
+      color: "#C8102E",
+    },
+    {
+      name: "Chelsea",
+      value: 35,
+      color: "#034694",
+    },
+  ]);
 
-  useEffect(() => {
-    fetch("https://www.breakingbadapi.com/api/characters?category=Breaking+Bad")
-      .then((response) => response.ok && response.json())
-      .then((characters) => {
-        setBbCharacters(
-          characters.sort((a, b) => a.name.localeCompare(b.name))
-        );
-      })
-      .catch(console.error);
-  }, []);
+  useInterval(() => {
+    if (start) {
+      const randomIndex = getRandomIndex(data);
+      setData(
+        data.map((entry, index) =>
+          index === randomIndex
+            ? {
+                ...entry,
+                value: entry.value + 3,
+              }
+            : entry
+        )
+      );
 
-  useEffect(() => {
-    fetch("https://www.breakingbadapi.com/api/episodes?series=Breaking+Bad")
-      .then((response) => response.ok && response.json())
-      .then((episodes) => {
-        console.warn(episodes);
-        setBbEpisodes(episodes);
-      })
-      .catch(console.error);
-  }, []);
+      setIteration(iteration + 1);
+    }
+  }, 500);
 
   return (
     <React.Fragment>
-      <h1>Breaking Bad Timeline</h1>
-      <BBTimeline highlight={highlight} data={bbEpisodes} />
-
-      <h2>Select your character</h2>
-      <select value={highlight} onChange={(e) => setHighlight(e.target.value)}>
-        <option>Select character</option>
-        {bbCharacters.map((character) => (
-          <option key={character.name}>{character.name}</option>
-        ))}
-      </select>
+      <h1>Premier League Eternal Standings</h1>
+      <RacingBarChart data={data} />
+      <button onClick={() => setStart(!start)}>
+        {start ? "Stop the season" : "Start the season!"}
+      </button>
+      <p>Week: {iteration}</p>
     </React.Fragment>
   );
 }
