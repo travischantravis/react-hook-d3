@@ -1,5 +1,4 @@
 svg {
-  background: #eee;
   overflow: visible;
   display: block;
   width: 100%;
@@ -12,10 +11,21 @@ svg {
   justify-content: center;
   height: 100vh;
   padding: 0 50px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 button {
-  width: 120px;
+  width: 100px;
   margin: 0 auto 5px;
   border: 1px solid black;
+}
+
+video {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: auto;
+  width: 100%;
 }
