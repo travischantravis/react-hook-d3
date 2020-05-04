@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { select, hierarchy, tree, linkHorizontal } from "d3";
 import useResizeObserver from "./useResizeObserver";
 
+// Hook that returns the last used value
 function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
@@ -10,12 +11,15 @@ function usePrevious(value) {
   return ref.current;
 }
 
+// Component that renders a tree
 function TreeChart({ data }) {
   const svgRef = useRef();
   const wrapperRef = useRef();
   const dimensions = useResizeObserver(wrapperRef);
 
-  // we save data to see if it changed
+  // only save the old data if we rendered it (with dimensions)
+  // otherwise the data in useEffect is always equal.
+  // reason: we skip the initial render (with no dimensions, but data).
   const previouslyRenderedData = usePrevious(data);
 
   // will be called initially and on every data change

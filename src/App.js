@@ -1,6 +1,7 @@
 // Let d3 do the DOM instead of react
 import React, { useState } from "react";
 import TreeChart from "./TreeChart";
+import ForceTreeChart from "./ForceTreeChart";
 
 import "./App.css";
 
@@ -32,11 +33,10 @@ function App() {
 
   return (
     <React.Fragment>
-      <h1>Animated Tree Chart</h1>
+      <h2>🪐 D3 Force Layout</h2>
+      <ForceTreeChart data={data} />
+      <h2>Animated Tree Chart</h2>
       <TreeChart data={data} />
-      <button onClick={() => setData(initialData.children[0])}>
-        Update data
-      </button>
     </React.Fragment>
   );
 }
