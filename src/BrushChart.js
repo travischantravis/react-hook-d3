@@ -13,7 +13,7 @@ import {
 import useResizeObserver from "./useResizeObserver";
 import usePrevious from "./usePrevious";
 
-export default function BrushChart({ data }) {
+export default function BrushChart({ data, children }) {
   const svgRef = useRef();
   const wrapperRef = useRef();
   const dimensions = useResizeObserver(wrapperRef);
@@ -90,11 +90,10 @@ export default function BrushChart({ data }) {
 
     // avoid infinite loop when setSelection is inside useEffect
     // initial position + retaining position on resize
-
     if (previousSelection === selection) {
       svg.select(".brush").call(brush).call(brush.move, selection.map(xScale));
     }
-  }, [data, dimensions, selection]);
+  }, [data, dimensions, previousSelection, selection]);
 
   return (
     <React.Fragment>
@@ -105,15 +104,7 @@ export default function BrushChart({ data }) {
           <g className="brush" />
         </svg>
       </div>
-      <small style={{ marginBottom: "1rem" }}>
-        Selected values: [
-        {data
-          .filter(
-            (value, index) => index >= selection[0] && index <= selection[1]
-          )
-          .join(", ")}
-        ]
-      </small>
+      {children(selection)}
     </React.Fragment>
   );
 }
