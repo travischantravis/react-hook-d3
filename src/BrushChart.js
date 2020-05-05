@@ -82,7 +82,7 @@ export default function BrushChart({ data, children }) {
         [width, height],
       ])
       .on("start brush end", () => {
-        if (event.selection) {
+        if (event.selection && event.selection[0] !== event.selection[1]) {
           const indexSelection = event.selection.map(xScale.invert);
           setSelection(indexSelection);
         }

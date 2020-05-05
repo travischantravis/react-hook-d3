@@ -6,12 +6,14 @@ const useResizeObserver = (ref) => {
   useEffect(() => {
     const observeTarget = ref.current;
     const resizeObserver = new ResizeObserver((entries) => {
+      // what are entries exactly
       entries.forEach((entry) => {
         setDimensions(entry.contentRect);
       });
     });
     resizeObserver.observe(observeTarget);
     return () => {
+      // clean-up function
       resizeObserver.unobserve(observeTarget);
     };
   }, [ref]);

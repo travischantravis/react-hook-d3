@@ -10,7 +10,11 @@ import {
 } from "d3";
 import useResizeObserver from "./useResizeObserver";
 
-export default function BrushChartChild({ data, selection }) {
+export default function BrushChartChild({
+  data,
+  selection,
+  id = "myClipPath",
+}) {
   const svgRef = useRef();
   const wrapperRef = useRef();
   const dimensions = useResizeObserver(wrapperRef);
@@ -18,14 +22,16 @@ export default function BrushChartChild({ data, selection }) {
   // will be called initially and on every data change
   useEffect(() => {
     const svg = select(svgRef.current);
+
+    // svgContent did not include axis
     const svgContent = svg.select(".content");
     const { width, height } =
       dimensions || wrapperRef.current.getBoundingClientRect();
 
     // scales + line generator
     const xScale = scaleLinear()
-      .domain(selection)
-      .range([10, width - 10]);
+      .domain(selection) // notice selection is passed to domain
+      .range([10, width - 10]); // minor tweaks to make axis shorter, so as to avoid clipPath to hide the boundaries
 
     const yScale = scaleLinear()
       .domain([0, max(data)])
@@ -56,12 +62,35 @@ export default function BrushChartChild({ data, selection }) {
       .attr("fill", "orange")
       .attr("cx", (value, index) => xScale(index))
       .attr("cy", yScale);
+
+    // axes
+    const xAxis = axisBottom(xScale);
+    svg
+      .select(".x-axis")
+      .attr("transform", `translate(0, ${height})`)
+      .call(xAxis);
+
+    const yAxis = axisLeft(yScale);
+    svg.select(".y-axis").call(yAxis);
   }, [data, dimensions, selection]);
+
+  if (!selection) {
+    return null;
+  }
+
+  // clipPath: a window that remove any parts of the combined shape that
+  // doesn’t fall within the clipPath
+
   return (
     <React.Fragment>
       <div ref={wrapperRef} style={{ marginBottom: "2rem" }}>
         <svg ref={svgRef}>
-          <g className="content"></g>
+          <defs>
+            <clipPath id={id}>
+              ><rect x="0" y="0" width="100%" height="100%" />
+            </clipPath>
+          </defs>
+          <g className="content" clipPath={`url(#${id})`}></g>
           <g className="x-axis" />
           <g className="y-axis" />
         </svg>
