@@ -21,7 +21,52 @@ export default function StackedBarChart({ data, keys, colors }) {
     const svg = select(svgRef.current);
     const { width, height } =
       dimensions || wrapperRef.current.getBoundingClientRect();
-  }, [data, dimensions]);
+
+    // stacks / layers
+    const stackGenerator = stack().keys(keys).order(stackOrderAscending);
+    const layers = stackGenerator(data);
+
+    // first, find the maximum of each array, then find the
+    // ultimate maximum of all maximums
+    const extent = [
+      0,
+      max(layers, (layer) => max(layer, (sequence) => sequence[1])),
+    ];
+
+    // scales
+    const xScale = scaleBand()
+      .domain(data.map((d) => d.year))
+      .range([0, width])
+      .padding(0.25);
+
+    const yScale = scaleLinear().domain(extent).range([height, 0]);
+
+    const xAxis = axisBottom(xScale);
+    const yAxis = axisLeft(yScale);
+
+    // rendering
+    // nesting rects under groups
+    svg
+      .selectAll(".layer")
+      .data(layers) // each layer contain 5 array of numbers
+      .join("g") // group
+      .attr("class", "layer")
+      .attr("fill", (layer) => colors[layer.key])
+      // the code below is called for every group (g) created
+      .selectAll("rect")
+      .data((layer) => layer) // each array in each layer
+      .join("rect") // rect
+      .attr("x", (sequence) => xScale(sequence.data.year))
+      .attr("width", xScale.bandwidth())
+      .attr("y", (sequence) => yScale(sequence[1]))
+      .attr("height", (sequence) => yScale(sequence[0]) - yScale(sequence[1]));
+
+    svg
+      .select(".x-axis")
+      .attr("transform", `translate(0, ${height})`)
+      .call(xAxis);
+    svg.select(".y-axis").call(yAxis);
+  }, [data, dimensions, colors, keys]);
   return (
     <React.Fragment>
       <div ref={wrapperRef} style={{ marginBottom: "2rem" }}>

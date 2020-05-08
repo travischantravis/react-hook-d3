@@ -55,7 +55,18 @@ function App() {
       <div className="fields">
         {allKeys.map((key) => (
           <div key={key} className="field">
-            <input id={key} type="checkbox" />
+            <input
+              id={key}
+              type="checkbox"
+              checked={keys.includes(key)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setKeys(Array.from(new Set([...keys, key])));
+                } else {
+                  setKeys(keys.filter((_key) => _key !== key));
+                }
+              }}
+            />
             <label htmlFor={key} style={{ color: colors[key] }}>
               {key}
             </label>
